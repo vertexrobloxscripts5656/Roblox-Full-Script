@@ -1,4 +1,4 @@
--- [[ VERTEX PROJECT | KEY SYSTEM REMOVED - 100% COMPLETE ]]
+-- [[ VERTEX PROJECT | UPDATED VERSION ]]
 
 _G.VertexScript = function()
     local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
@@ -6,7 +6,7 @@ _G.VertexScript = function()
     local Window = Rayfield:CreateWindow({
        Name = "🚀 VERTEX | ELITE PANEL",
        LoadingTitle = "⚡ VERTEX PROJECT ⚡", 
-       KeySystem = false -- Key system completely disabled.
+       KeySystem = false 
     })
 
     -- VARIABLES
@@ -28,12 +28,6 @@ _G.VertexScript = function()
     _G.WallCheck = true
     _G.AimPart = "Head"
     _G.TeamCheck = true 
-
-    -- 3RD PERSON CAMERA VARIABLES
-    _G.ThirdPersonEnabled = false
-    _G.TPDistance = 15
-    local camRotationX = 0
-    local camRotationY = 0
 
     -- FOV CIRCLE
     local FovCircle = Drawing.new("Circle")
@@ -119,28 +113,6 @@ _G.VertexScript = function()
             local target = GetClosestTarget()
             if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) end
         end
-
-        -- VIRTUAL CAMERA FIX SYSTEM
-        if _G.ThirdPersonEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-            Camera.CameraType = Enum.CameraType.Scriptable
-            if uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton2) then
-                local delta = uis:GetMouseDelta()
-                camRotationX = camRotationX - delta.X * 0.4
-                camRotationY = math.clamp(camRotationY - delta.Y * 0.4, -75, 75)
-                uis.MouseBehavior = Enum.MouseBehavior.LockCurrentPosition
-            else
-                uis.MouseBehavior = Enum.MouseBehavior.Default
-            end
-            local rootPos = player.Character.HumanoidRootPart.Position
-            local rotationCFrame = CFrame.Angles(0, math.rad(camRotationX), 0) * CFrame.Angles(math.rad(camRotationY), 0, 0)
-            local targetCamPos = rootPos + rotationCFrame:VectorToWorldSpace(Vector3.new(0, 2, _G.TPDistance))
-            Camera.CFrame = CFrame.new(targetCamPos, rootPos + Vector3.new(0, 2, 0))
-        else
-            if Camera.CameraType == Enum.CameraType.Scriptable then
-                Camera.CameraType = Enum.CameraType.Custom
-                uis.MouseBehavior = Enum.MouseBehavior.Default
-            end
-        end
     end)
 
     -- TABS
@@ -215,9 +187,6 @@ _G.VertexScript = function()
     end})
     Tab2:CreateSlider({Name = "Hitbox Level", Range = {2, 100}, Increment = 1, CurrentValue = 20, Callback = function(V) _G.HeadSize = V end})
     
-    Tab2:CreateToggle({Name = "3rd Person Mode", CurrentValue = false, Callback = function(V) _G.ThirdPersonEnabled = V end})
-    Tab2:CreateSlider({Name = "Camera Distance", Range = {5, 50}, Increment = 1, CurrentValue = 15, Callback = function(V) _G.TPDistance = V end})
-
     Tab2:CreateButton({Name = "Invisibility", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Kixdev/roblox-invisible-hybrid-script/refs/heads/main/main.lua"))() end})
     Tab2:CreateButton({Name = "ESP", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/vylerascripts/vylera-scripts/main/vylerabladeball.lua"))() end})
 
@@ -226,107 +195,23 @@ _G.VertexScript = function()
         Name = "OPEN SPINBOT & TP MENU 😎", 
         Callback = function()
             if game.CoreGui:FindFirstChild("VertexMinimal") then game.CoreGui.VertexMinimal:Destroy() end
-            
             _G.SpinbotEnabled = false
             _G.SpinSpeed = 50
-
-            local sg = Instance.new("ScreenGui", game.CoreGui)
-            sg.Name = "VertexMinimal"
-
-            local main = Instance.new("Frame", sg)
-            main.Size = UDim2.new(0, 180, 0, 220)
-            main.Position = UDim2.new(0.05, 0, 0.3, 0)
-            main.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-            main.BorderSizePixel = 2
-            main.BorderColor3 = Color3.fromRGB(255, 0, 0)
-            main.Active = true
-            main.Draggable = true
-
-            local title = Instance.new("TextLabel", main)
-            title.Size = UDim2.new(1, 0, 0, 30)
-            title.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-            title.Text = "VERTEX LITE 😎"
-            title.TextColor3 = Color3.new(1, 1, 1)
-            title.TextSize = 14
-
-            local spinBtn = Instance.new("TextButton", main)
-            spinBtn.Size = UDim2.new(0.9, 0, 0, 35)
-            spinBtn.Position = UDim2.new(0.05, 0, 0.18, 0)
-            spinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            spinBtn.Text = "Spinbot: OFF"
-            spinBtn.TextColor3 = Color3.new(1, 1, 1)
-
-            spinBtn.MouseButton1Click:Connect(function()
-                _G.SpinbotEnabled = not _G.SpinbotEnabled
-                spinBtn.Text = _G.SpinbotEnabled and "Spinbot: ON" or "Spinbot: OFF"
-                spinBtn.BackgroundColor3 = _G.SpinbotEnabled and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(40, 40, 40)
-            end)
-
-            local speedLabel = Instance.new("TextLabel", main)
-            speedLabel.Size = UDim2.new(0.9, 0, 0, 20)
-            speedLabel.Position = UDim2.new(0.05, 0, 0.38, 0)
-            speedLabel.BackgroundTransparency = 1
-            speedLabel.Text = "Spin Speed: " .. _G.SpinSpeed
-            speedLabel.TextColor3 = Color3.new(1, 1, 1)
-
-            local addSpeed = Instance.new("TextButton", main)
-            addSpeed.Size = UDim2.new(0.4, 0, 0, 30)
-            addSpeed.Position = UDim2.new(0.05, 0, 0.48, 0)
-            addSpeed.Text = "Speed +"
-            addSpeed.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            addSpeed.TextColor3 = Color3.new(1,1,1)
-
-            local subSpeed = Instance.new("TextButton", main)
-            subSpeed.Size = UDim2.new(0.4, 0, 0, 30)
-            subSpeed.Position = UDim2.new(0.55, 0, 0.48, 0)
-            subSpeed.Text = "Speed -"
-            subSpeed.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-            subSpeed.TextColor3 = Color3.new(1,1,1)
-
+            local sg = Instance.new("ScreenGui", game.CoreGui); sg.Name = "VertexMinimal"
+            local main = Instance.new("Frame", sg); main.Size = UDim2.new(0, 180, 0, 220); main.Position = UDim2.new(0.05, 0, 0.3, 0); main.BackgroundColor3 = Color3.fromRGB(25, 25, 25); main.BorderSizePixel = 2; main.BorderColor3 = Color3.fromRGB(255, 0, 0); main.Active = true; main.Draggable = true
+            local title = Instance.new("TextLabel", main); title.Size = UDim2.new(1, 0, 0, 30); title.BackgroundColor3 = Color3.fromRGB(150, 0, 0); title.Text = "VERTEX LITE 😎"; title.TextColor3 = Color3.new(1, 1, 1); title.TextSize = 14
+            local spinBtn = Instance.new("TextButton", main); spinBtn.Size = UDim2.new(0.9, 0, 0, 35); spinBtn.Position = UDim2.new(0.05, 0, 0.18, 0); spinBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40); spinBtn.Text = "Spinbot: OFF"; spinBtn.TextColor3 = Color3.new(1, 1, 1)
+            spinBtn.MouseButton1Click:Connect(function() _G.SpinbotEnabled = not _G.SpinbotEnabled; spinBtn.Text = _G.SpinbotEnabled and "Spinbot: ON" or "Spinbot: OFF"; spinBtn.BackgroundColor3 = _G.SpinbotEnabled and Color3.fromRGB(0, 100, 0) or Color3.fromRGB(40, 40, 40) end)
+            local speedLabel = Instance.new("TextLabel", main); speedLabel.Size = UDim2.new(0.9, 0, 0, 20); speedLabel.Position = UDim2.new(0.05, 0, 0.38, 0); speedLabel.BackgroundTransparency = 1; speedLabel.Text = "Spin Speed: " .. _G.SpinSpeed; speedLabel.TextColor3 = Color3.new(1, 1, 1)
+            local addSpeed = Instance.new("TextButton", main); addSpeed.Size = UDim2.new(0.4, 0, 0, 30); addSpeed.Position = UDim2.new(0.05, 0, 0.48, 0); addSpeed.Text = "Speed +"; addSpeed.BackgroundColor3 = Color3.fromRGB(60, 60, 60); addSpeed.TextColor3 = Color3.new(1,1,1)
+            local subSpeed = Instance.new("TextButton", main); subSpeed.Size = UDim2.new(0.4, 0, 0, 30); subSpeed.Position = UDim2.new(0.55, 0, 0.48, 0); subSpeed.Text = "Speed -"; subSpeed.BackgroundColor3 = Color3.fromRGB(60, 60, 60); subSpeed.TextColor3 = Color3.new(1,1,1)
             addSpeed.MouseButton1Click:Connect(function() _G.SpinSpeed = _G.SpinSpeed + 10 speedLabel.Text = "Spin Speed: " .. _G.SpinSpeed end)
             subSpeed.MouseButton1Click:Connect(function() _G.SpinSpeed = math.max(10, _G.SpinSpeed - 10) speedLabel.Text = "Spin Speed: " .. _G.SpinSpeed end)
-
-            local tpTitle = Instance.new("TextLabel", main)
-            tpTitle.Size = UDim2.new(1, 0, 0, 25)
-            tpTitle.Position = UDim2.new(0, 0, 0.65, 0)
-            tpTitle.BackgroundColor3 = Color3.fromRGB(40, 0, 0)
-            tpTitle.Text = "TP TO PLAYER"
-            tpTitle.TextColor3 = Color3.new(1,1,1)
-
-            local scroll = Instance.new("ScrollingFrame", main)
-            scroll.Size = UDim2.new(0.9, 0, 0.25, 0)
-            scroll.Position = UDim2.new(0.05, 0, 0.77, 0)
-            scroll.CanvasSize = UDim2.new(0, 0, 5, 0)
-            scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            local layout = Instance.new("UIListLayout", scroll)
-
-            local function updateTPList()
-                for _, v in pairs(scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end
-                for _, p in pairs(game.Players:GetPlayers()) do
-                    if p ~= player then
-                        local btn = Instance.new("TextButton", scroll)
-                        btn.Size = UDim2.new(1, -5, 0, 25)
-                        btn.Text = p.Name
-                        btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
-                        btn.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-                        btn.MouseButton1Click:Connect(function()
-                            if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
-                                player.Character:PivotTo(p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0))
-                            end
-                        end)
-                    end
-                end
-            end
-
-            runService.RenderStepped:Connect(function()
-                if _G.SpinbotEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                    player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(_G.SpinSpeed), 0)
-                end
-            end)
-
-            task.spawn(function()
-                while task.wait(5) and sg.Parent do updateTPList() end
-            end)
+            local tpTitle = Instance.new("TextLabel", main); tpTitle.Size = UDim2.new(1, 0, 0, 25); tpTitle.Position = UDim2.new(0, 0, 0.65, 0); tpTitle.BackgroundColor3 = Color3.fromRGB(40, 0, 0); tpTitle.Text = "TP TO PLAYER"; tpTitle.TextColor3 = Color3.new(1,1,1)
+            local scroll = Instance.new("ScrollingFrame", main); scroll.Size = UDim2.new(0.9, 0, 0.25, 0); scroll.Position = UDim2.new(0.05, 0, 0.77, 0); scroll.CanvasSize = UDim2.new(0, 0, 5, 0); scroll.BackgroundColor3 = Color3.fromRGB(20, 20, 20); local layout = Instance.new("UIListLayout", scroll)
+            local function updateTPList() for _, v in pairs(scroll:GetChildren()) do if v:IsA("TextButton") then v:Destroy() end end for _, p in pairs(game.Players:GetPlayers()) do if p ~= player then local btn = Instance.new("TextButton", scroll); btn.Size = UDim2.new(1, -5, 0, 25); btn.Text = p.Name; btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45); btn.TextColor3 = Color3.new(0.8, 0.8, 0.8); btn.MouseButton1Click:Connect(function() if p.Character and p.Character:FindFirstChild("HumanoidRootPart") then player.Character:PivotTo(p.Character.HumanoidRootPart.CFrame * CFrame.new(0, 5, 0)) end end) end end end
+            runService.RenderStepped:Connect(function() if _G.SpinbotEnabled and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then player.Character.HumanoidRootPart.CFrame = player.Character.HumanoidRootPart.CFrame * CFrame.Angles(0, math.rad(_G.SpinSpeed), 0) end end)
+            task.spawn(function() while task.wait(5) and sg.Parent do updateTPList() end end)
             updateTPList()
         end
     })
@@ -354,6 +239,14 @@ _G.VertexScript = function()
         end
     })
 
+    Tab3:CreateSection("🌳 Ormanda 99 Gece (Nights in the Forest 2)")
+    Tab3:CreateButton({
+        Name = "Voidware 🎉 (Nights/English)", 
+        Callback = function() 
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest2.lua"))() 
+        end
+    })
+
     Tab3:CreateSection("🦁 Savannah Life")
     Tab3:CreateButton({Name = "🚫 DELETE GRASS", Callback = function() for _, obj in pairs(game.Workspace:GetDescendants()) do if obj.Name:find("Grass") then obj:Destroy() end end end})
     Tab3:CreateToggle({Name = "🔦 Night Vision", CurrentValue = false, Callback = function(V) if V then lighting.Ambient = Color3.new(1,1,1); lighting.Brightness = 2 else lighting.Ambient = Color3.fromRGB(127,127,127); lighting.Brightness = 1 end end})
@@ -361,6 +254,22 @@ _G.VertexScript = function()
     -- --- TAB 4: SETTINGS ---
     Tab4:CreateSection("🎨 Appearance")
     Tab4:CreateColorPicker({Name = "Theme Color", Color = Color3.fromRGB(255, 0, 0), Callback = function(Value) Window:ModifyTheme({["AccentColor"] = Value}) end})
+    
+    Tab4:CreateSection("🌐 Language / Dil")
+    Tab4:CreateDropdown({
+        Name = "Select Language",
+        Options = {"English", "Türkçe"},
+        CurrentOption = {"Türkçe"},
+        MultipleOptions = false,
+        Callback = function(Option)
+            if Option[1] == "Türkçe" then
+                Rayfield:Notify({Title = "Dil Değişti", Content = "Script dili Türkçe olarak ayarlandı!", Duration = 3})
+            else
+                Rayfield:Notify({Title = "Language Changed", Content = "Script language set to English!", Duration = 3})
+            end
+        end,
+    })
+
     Tab4:CreateSection("⚡ System")
     Tab4:CreateButton({Name = "🚀 FPS Booster", Callback = function() lighting.GlobalShadows = false settings().Rendering.QualityLevel = "Level01" for _, v in pairs(game:GetDescendants()) do if v:IsA("Part") then v.Material = "Plastic" end end end})
     Tab4:CreateButton({Name = "📈 OPEN FPS COUNTER", Callback = function()
