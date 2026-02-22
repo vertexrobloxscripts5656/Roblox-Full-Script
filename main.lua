@@ -21,6 +21,7 @@ _G.VertexScript = function()
     local noclip, flying, flyspeed = false, false, 50
     _G.HeadSize = 20
     _G.HitboxEnabled, _G.SpeedActive, _G.SpeedPower = false, false, 0.5
+    _G.InfJumpEnabled = false -- Yeni değişken eklendi Bro😎
     
     -- ARSENAL SYSTEM STATUS
     _G.ArsenalMaster = false
@@ -36,10 +37,10 @@ _G.VertexScript = function()
     FovCircle.Color = Color3.fromRGB(255, 255, 255)
     FovCircle.Thickness = 1
 
-    -- --- GO UP WITH SPACE ---
+    -- --- GO UP WITH SPACE (INFINITE JUMP) ---
     local upSpeed = 2 
     runService.Heartbeat:Connect(function()
-        if uis:IsKeyDown(Enum.KeyCode.Space) then
+        if _G.InfJumpEnabled and uis:IsKeyDown(Enum.KeyCode.Space) then -- Toggle kontrolü buraya eklendi
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 player.Character.HumanoidRootPart.Velocity = Vector3.new(
                     player.Character.HumanoidRootPart.Velocity.X, 
@@ -128,6 +129,16 @@ _G.VertexScript = function()
 
     -- --- TAB 2: MAIN SCRIPTS ---
     Tab2:CreateSection("🏎️ Movement & Speed")
+    
+    -- Infinite Jump Toggle Bro😎
+    Tab2:CreateToggle({
+        Name = "Infinite Jump (Space)", 
+        CurrentValue = false, 
+        Callback = function(Value)
+            _G.InfJumpEnabled = Value
+        end
+    })
+
     Tab2:CreateButton({
         Name = "⚡ SMOOTH SPEED PANEL",
         Callback = function()
