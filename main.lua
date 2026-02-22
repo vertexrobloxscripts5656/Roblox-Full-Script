@@ -21,10 +21,11 @@ _G.VertexScript = function()
     local noclip, flying, flyspeed = false, false, 50
     _G.HeadSize = 20
     _G.HitboxEnabled, _G.SpeedActive, _G.SpeedPower = false, false, 0.5
-    _G.InfJumpEnabled = false -- Yeni değişken eklendi Bro😎
+    _G.InfJumpEnabled = false
     
     -- ARSENAL SYSTEM STATUS
     _G.ArsenalMaster = false
+    _G.RageMode = false -- Yeni Rage Mode değişkeni Bro😎
     _G.FovRadius = 150
     _G.WallCheck = true
     _G.AimPart = "Head"
@@ -40,7 +41,7 @@ _G.VertexScript = function()
     -- --- GO UP WITH SPACE (INFINITE JUMP) ---
     local upSpeed = 2 
     runService.Heartbeat:Connect(function()
-        if _G.InfJumpEnabled and uis:IsKeyDown(Enum.KeyCode.Space) then -- Toggle kontrolü buraya eklendi
+        if _G.InfJumpEnabled and uis:IsKeyDown(Enum.KeyCode.Space) then
             if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
                 player.Character.HumanoidRootPart.Velocity = Vector3.new(
                     player.Character.HumanoidRootPart.Velocity.X, 
@@ -109,10 +110,16 @@ _G.VertexScript = function()
         FovCircle.Visible = _G.ArsenalMaster
         UpdateESP()
         
-        -- Aimbot
-        if _G.ArsenalMaster and uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton1) then
-            local target = GetClosestTarget()
-            if target then Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) end
+        -- Aimbot Logic (Updated for Rage Mode Bro😎)
+        if _G.ArsenalMaster then
+            local isShooting = uis:IsMouseButtonPressed(Enum.UserInputType.MouseButton1)
+            
+            if _G.RageMode or isShooting then
+                local target = GetClosestTarget()
+                if target then 
+                    Camera.CFrame = CFrame.new(Camera.CFrame.Position, target.Position) 
+                end
+            end
         end
     end)
 
@@ -129,16 +136,7 @@ _G.VertexScript = function()
 
     -- --- TAB 2: MAIN SCRIPTS ---
     Tab2:CreateSection("🏎️ Movement & Speed")
-    
-    -- Infinite Jump Toggle Bro😎
-    Tab2:CreateToggle({
-        Name = "Infinite Jump (Space)", 
-        CurrentValue = false, 
-        Callback = function(Value)
-            _G.InfJumpEnabled = Value
-        end
-    })
-
+    Tab2:CreateToggle({Name = "Infinite Jump (Space)", CurrentValue = false, Callback = function(V) _G.InfJumpEnabled = V end})
     Tab2:CreateButton({
         Name = "⚡ SMOOTH SPEED PANEL",
         Callback = function()
@@ -151,53 +149,13 @@ _G.VertexScript = function()
         end
     })
     Tab2:CreateSlider({Name = "WalkSpeed Power", Range = {0.1, 2}, Increment = 0.1, CurrentValue = 0.5, Callback = function(V) _G.SpeedPower = V end})
-    
-    Tab2:CreateToggle({Name = "Noclip", CurrentValue = false, Callback = function(V) 
-        noclip = V 
-        runService.Stepped:Connect(function() if noclip and player.Character then for _, v in pairs(player.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end end)
-    end})
-
-    Tab2:CreateKeybind({
-        Name = "Fly (F)", 
-        CurrentKeybind = "F", 
-        Callback = function()
-            flying = not flying
-            local char = player.Character
-            if flying then
-                local bv = Instance.new("BodyVelocity", char.HumanoidRootPart); bv.Name = "HasoFlyVelocity"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-                local bg = Instance.new("BodyGyro", char.HumanoidRootPart); bg.Name = "HasoFlyGyro"; bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-                task.spawn(function()
-                    while flying and char:FindFirstChild("HumanoidRootPart") do
-                        local cam, moveDir = workspace.CurrentCamera, Vector3.new(0,0,0)
-                        if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end
-                        if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end
-                        if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end
-                        if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end
-                        bv.Velocity = moveDir * flyspeed; bg.CFrame = cam.CFrame; runService.RenderStepped:Wait()
-                    end
-                    bv:Destroy(); bg:Destroy()
-                end)
-            end
-        end
-    })
+    Tab2:CreateToggle({Name = "Noclip", CurrentValue = false, Callback = function(V) noclip = V runService.Stepped:Connect(function() if noclip and player.Character then for _, v in pairs(player.Character:GetDescendants()) do if v:IsA("BasePart") then v.CanCollide = false end end end end) end})
+    Tab2:CreateKeybind({Name = "Fly (F)", CurrentKeybind = "F", Callback = function() flying = not flying local char = player.Character if flying then local bv = Instance.new("BodyVelocity", char.HumanoidRootPart); bv.Name = "HasoFlyVelocity"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge); local bg = Instance.new("BodyGyro", char.HumanoidRootPart); bg.Name = "HasoFlyGyro"; bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge); task.spawn(function() while flying and char:FindFirstChild("HumanoidRootPart") do local cam, moveDir = workspace.CurrentCamera, Vector3.new(0,0,0) if uis:IsKeyDown(Enum.KeyCode.W) then moveDir = moveDir + cam.CFrame.LookVector end if uis:IsKeyDown(Enum.KeyCode.S) then moveDir = moveDir - cam.CFrame.LookVector end if uis:IsKeyDown(Enum.KeyCode.A) then moveDir = moveDir - cam.CFrame.RightVector end if uis:IsKeyDown(Enum.KeyCode.D) then moveDir = moveDir + cam.CFrame.RightVector end bv.Velocity = moveDir * flyspeed; bg.CFrame = cam.CFrame; runService.RenderStepped:Wait() end bv:Destroy(); bg:Destroy() end) end end})
     Tab2:CreateSlider({Name = "Fly Speed Setting", Range = {10, 300}, Increment = 5, CurrentValue = 50, Callback = function(V) flyspeed = V end})
 
     Tab2:CreateSection("🎯 Combat & Visuals")
-    Tab2:CreateToggle({Name = "Hitbox Active", CurrentValue = false, Callback = function(V)
-        _G.HitboxEnabled = V
-        task.spawn(function()
-            while _G.HitboxEnabled do
-                for _, v in pairs(game.Players:GetPlayers()) do
-                    if v ~= player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then
-                        pcall(function() v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize); v.Character.HumanoidRootPart.Transparency = 0.7; v.Character.HumanoidRootPart.CanCollide = false end)
-                    end
-                end
-                task.wait(1)
-            end
-        end)
-    end})
+    Tab2:CreateToggle({Name = "Hitbox Active", CurrentValue = false, Callback = function(V) _G.HitboxEnabled = V task.spawn(function() while _G.HitboxEnabled do for _, v in pairs(game.Players:GetPlayers()) do if v ~= player and v.Character and v.Character:FindFirstChild("HumanoidRootPart") then pcall(function() v.Character.HumanoidRootPart.Size = Vector3.new(_G.HeadSize, _G.HeadSize, _G.HeadSize); v.Character.HumanoidRootPart.Transparency = 0.7; v.Character.HumanoidRootPart.CanCollide = false end) end end task.wait(1) end end) end})
     Tab2:CreateSlider({Name = "Hitbox Level", Range = {2, 100}, Increment = 1, CurrentValue = 20, Callback = function(V) _G.HeadSize = V end})
-    
     Tab2:CreateButton({Name = "Invisibility", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/Kixdev/roblox-invisible-hybrid-script/refs/heads/main/main.lua"))() end})
     Tab2:CreateButton({Name = "ESP", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/vylerascripts/vylera-scripts/main/vylerabladeball.lua"))() end})
 
@@ -231,32 +189,35 @@ _G.VertexScript = function()
     Tab3:CreateSection("🔪 MM2")
     Tab3:CreateButton({Name = "💉 VERTEX SCRIPT", Callback = function() loadstring(game:HttpGet('https://raw.smokingscripts.org/vertex.lua'))() end})
     
-    Tab3:CreateSection("🔫 ARSENAL")
+    Tab3:CreateSection("🔫 ARSENAL / COMBAT")
     Tab3:CreateToggle({
-        Name = "AIMBOT + ESP (ON/OFF)",
+        Name = "AIMBOT + ESP (MASTER)",
         CurrentValue = false,
         Callback = function(v) 
             _G.ArsenalMaster = v
             Rayfield:Notify({Title = "Arsenal Mod", Content = v and "Aimbot and ESP Active!" or "System Closed.", Duration = 2})
         end
     })
-    Tab3:CreateToggle({Name = "Team Check", CurrentValue = true, Callback = function(v) _G.TeamCheck = v end})
-    Tab3:CreateSlider({Name = "FOV Size", Range = {50, 500}, Increment = 10, CurrentValue = 150, Callback = function(v) _G.FovRadius = v end})
     
-    Tab3:CreateButton({
-        Name = "Fps Game Rage 🎉", 
-        Callback = function() 
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/blackowl1231/Z3US/refs/heads/main/main.lua"))() 
+    -- Rage Mode Toggle Bro😎
+    Tab3:CreateToggle({
+        Name = "Rage Mode (Auto Lock)", 
+        CurrentValue = false, 
+        Callback = function(v) 
+            _G.RageMode = v 
+            if v then 
+                Rayfield:Notify({Title = "Rage Active!", Content = "Auto-locking visible targets.", Duration = 2})
+            end
         end
     })
 
-    Tab3:CreateSection("🌳 Ormanda 99 Gece (Nights in the Forest 2)")
-    Tab3:CreateButton({
-        Name = "Voidware 🎉 (Nights/English)", 
-        Callback = function() 
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest2.lua"))() 
-        end
-    })
+    Tab3:CreateToggle({Name = "Team Check", CurrentValue = true, Callback = function(v) _G.TeamCheck = v end})
+    Tab3:CreateSlider({Name = "FOV Size", Range = {50, 500}, Increment = 10, CurrentValue = 150, Callback = function(v) _G.FovRadius = v end})
+    
+    Tab3:CreateButton({Name = "Fps Game Rage 🎉", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/blackowl1231/Z3US/refs/heads/main/main.lua"))() end})
+
+    Tab3:CreateSection("🌳 Ormanda 99 Gece")
+    Tab3:CreateButton({Name = "Voidware 🎉", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/VapeVoidware/VW-Add/main/nightsintheforest2.lua"))() end})
 
     Tab3:CreateSection("🦁 Savannah Life")
     Tab3:CreateButton({Name = "🚫 DELETE GRASS", Callback = function() for _, obj in pairs(game.Workspace:GetDescendants()) do if obj.Name:find("Grass") then obj:Destroy() end end end})
@@ -266,30 +227,9 @@ _G.VertexScript = function()
     Tab4:CreateSection("🎨 Appearance")
     Tab4:CreateColorPicker({Name = "Theme Color", Color = Color3.fromRGB(255, 0, 0), Callback = function(Value) Window:ModifyTheme({["AccentColor"] = Value}) end})
     
-    Tab4:CreateSection("🌐 Language / Dil")
-    Tab4:CreateDropdown({
-        Name = "Select Language",
-        Options = {"English", "Türkçe"},
-        CurrentOption = {"Türkçe"},
-        MultipleOptions = false,
-        Callback = function(Option)
-            if Option[1] == "Türkçe" then
-                Rayfield:Notify({Title = "Dil Değişti", Content = "Script dili Türkçe olarak ayarlandı!", Duration = 3})
-            else
-                Rayfield:Notify({Title = "Language Changed", Content = "Script language set to English!", Duration = 3})
-            end
-        end,
-    })
-
     Tab4:CreateSection("⚡ System")
     Tab4:CreateButton({Name = "🚀 FPS Booster", Callback = function() lighting.GlobalShadows = false settings().Rendering.QualityLevel = "Level01" for _, v in pairs(game:GetDescendants()) do if v:IsA("Part") then v.Material = "Plastic" end end end})
-    Tab4:CreateButton({Name = "📈 OPEN FPS COUNTER", Callback = function()
-        if game.CoreGui:FindFirstChild("HasanFPS_Pro") then game.CoreGui.HasanFPS_Pro:Destroy() end
-        local sg = Instance.new("ScreenGui", game.CoreGui); sg.Name = "HasanFPS_Pro"
-        local main = Instance.new("Frame", sg); main.Size = UDim2.new(0, 75, 0, 25); main.Position = UDim2.new(0, 10, 0, 10); main.BackgroundColor3 = Color3.new(0,0,0); main.BackgroundTransparency = 0.3; main.Draggable = true; main.Active = true
-        local label = Instance.new("TextLabel", main); label.Size = UDim2.new(1,0,1,0); label.TextColor3 = Color3.new(1,1,1); label.Text = "FPS: ..."
-        task.spawn(function() local lastUpdate = tick(); local frames = 0 while sg.Parent do frames = frames + 1 if tick() - lastUpdate >= 1 then label.Text = "FPS: " .. frames; frames = 0; lastUpdate = tick() end runService.RenderStepped:Wait() end end)
-    end})
+    Tab4:CreateButton({Name = "📈 OPEN FPS COUNTER", Callback = function() if game.CoreGui:FindFirstChild("HasanFPS_Pro") then game.CoreGui.HasanFPS_Pro:Destroy() end local sg = Instance.new("ScreenGui", game.CoreGui); sg.Name = "HasanFPS_Pro"; local main = Instance.new("Frame", sg); main.Size = UDim2.new(0, 75, 0, 25); main.Position = UDim2.new(0, 10, 0, 10); main.BackgroundColor3 = Color3.new(0,0,0); main.BackgroundTransparency = 0.3; main.Draggable = true; main.Active = true; local label = Instance.new("TextLabel", main); label.Size = UDim2.new(1,0,1,0); label.TextColor3 = Color3.new(1,1,1); label.Text = "FPS: ..."; task.spawn(function() local lastUpdate = tick(); local frames = 0 while sg.Parent do frames = frames + 1 if tick() - lastUpdate >= 1 then label.Text = "FPS: " .. frames; frames = 0; lastUpdate = tick() end runService.RenderStepped:Wait() end end) end})
     Tab4:CreateButton({Name = "♻️ Restart Script", Callback = function() Rayfield:Destroy(); task.wait(0.3); _G.VertexScript() end})
 
     Window:ModifyTheme({["AccentColor"] = Color3.fromRGB(255, 0, 0)})
